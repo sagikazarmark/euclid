@@ -1,0 +1,59 @@
+openapi: 3.0.0
+info:
+  contact:
+    email: mark.sagikazar+euclid@gmail.com
+  description: Sequential ID generator
+  license:
+    name: MIT
+    url: https://github.com/sagikazarmark/euclid/blob/master/LICENSE
+  title: Euclid API
+  version: 1.0.0
+servers:
+- description: SwaggerHub API Auto Mocking
+  url: https://virtserver.swaggerhub.com/sagikazarmark/euclid/1.0.0
+paths:
+  /id:
+    post:
+      description: Gets the next ID in the sequence
+      operationId: nextId
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IdRequest'
+        description: Id parameters
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdResponse'
+          description: id created
+        400:
+          description: invalid input, object invalid
+      summary: get next id
+components:
+  schemas:
+    IdRequest:
+      example:
+        name: default
+      properties:
+        name:
+          description: Name of the sequence
+          example: default
+          type: string
+      required:
+      - name
+      type: object
+    IdResponse:
+      example:
+        id: 1
+      properties:
+        id:
+          example: 1
+          format: int32
+          minimum: 1
+          type: integer
+      required:
+      - id
+      type: object

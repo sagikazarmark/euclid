@@ -6,6 +6,7 @@ OS = $(shell uname)
 BUILD_PACKAGE = ./cmd/euclid
 BINARY_NAME ?= euclid
 DOCKER_IMAGE = sagikazarmark/euclid
+OPENAPI_DESCRIPTOR = openapi.yaml
 
 # Build variables
 BUILD_DIR ?= build
@@ -27,6 +28,7 @@ DOCKER_TAG ?= ${VERSION}
 # Dependency versions
 GOTESTSUM_VERSION = 0.3.2
 GOLANGCI_VERSION = 1.12.3
+OPENAPI_GENERATOR_VERSION = 3.3.4
 
 GOLANG_VERSION = 1.11
 
@@ -163,6 +165,22 @@ bin/golangci-lint-${GOLANGCI_VERSION}:
 .PHONY: lint
 lint: bin/golangci-lint ## Run linter
 	bin/golangci-lint run
+
+.PHONY: validate-openapi
+validate-openapi: ## Validate the OpenAPI descriptor
+	docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli:v${OPENAPI_GENERATOR_VERSION} validate --recommend -i /local/${OPENAPI_DESCRIPTOR}
+
+.PHONY: generate-api
+generate-api: ## Generate server stubs from the OpenAPI descriptor
+	rm -rf .gen/openapi
+	docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli:v${OPENAPI_GENERATOR_VERSION} generate \
+	--additional-properties packageName=api \
+	--additional-properties withGoCodegenComment=true \
+	-i /local/${OPENAPI_DESCRIPTOR} \
+	-g go-server \
+	-o /local/.gen/openapi
+	rm -rf .gen/openapi/main.go .gen/openapi/Dockerfile
+
 
 release-%: TAG_PREFIX = v
 release-%:

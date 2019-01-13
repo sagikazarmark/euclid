@@ -12,7 +12,7 @@ func NewApp(sequence Sequence, errorHandler ErrorHandler) http.Handler {
 
 	router := mux.NewRouter()
 
-	router.Path("/new/{name}").Methods("POST").Handler(newID)
+	router.Path("/id").Methods("POST").Handler(newID)
 
 	return router
 }
