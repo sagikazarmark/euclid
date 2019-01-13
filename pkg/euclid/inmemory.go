@@ -15,7 +15,7 @@ type InMemorySequence struct {
 }
 
 // Generate generates the next ID of a sequence.
-func (s *InMemorySequence) Next(name string) uint {
+func (s *InMemorySequence) Next(name string) (uint, error) {
 	s.ml.Lock(name)
 	defer s.ml.Unlock(name)
 
@@ -27,5 +27,5 @@ func (s *InMemorySequence) Next(name string) uint {
 
 	s.cur[name]++
 
-	return s.cur[name]
+	return s.cur[name], nil
 }
