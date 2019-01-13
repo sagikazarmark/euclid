@@ -1,44 +1,57 @@
 package multilock
 
 import (
-	"sync"
+	"runtime"
+	"strconv"
 	"testing"
-	"time"
-
-	"github.com/stretchr/testify/assert"
 )
 
+func HammerLock(m *Lock, loops int, cdone chan bool) {
+	for i := 0; i < loops; i++ {
+		m.Lock("name")
+		m.Unlock("name")
+	}
+	cdone <- true
+}
+
 func TestLock(t *testing.T) {
-	var mu Lock
-	var wg sync.WaitGroup
+	if n := runtime.SetMutexProfileFraction(1); n != 0 {
+		t.Logf("got mutexrate %d expected 0", n)
+	}
+	defer runtime.SetMutexProfileFraction(0)
 
-	wg.Add(2)
+	m := new(Lock)
+	c := make(chan bool)
+	for i := 0; i < 10; i++ {
+		go HammerLock(m, 1000, c)
+	}
 
-	var counter []int
+	for i := 0; i < 10; i++ {
+		<-c
+	}
+}
 
-	go func() {
-		defer wg.Done()
+func HammerLockMultiple(m *Lock, cycle int, loops int, cdone chan bool) {
+	for i := 0; i < loops; i++ {
+		m.Lock(strconv.Itoa(cycle))
+		m.Unlock(strconv.Itoa(cycle))
+	}
+	cdone <- true
+}
 
-		for i := 2; i < 10; i += 2 {
-			mu.Lock("counter")
-			counter = append(counter, i)
-			mu.Unlock("counter")
-			time.Sleep(50 * time.Millisecond)
-		}
-	}()
+func TestLock_CanHoldMultipleLocks(t *testing.T) {
+	if n := runtime.SetMutexProfileFraction(1); n != 0 {
+		t.Logf("got mutexrate %d expected 0", n)
+	}
+	defer runtime.SetMutexProfileFraction(0)
 
-	go func() {
-		defer wg.Done()
+	m := new(Lock)
+	c := make(chan bool)
+	for i := 0; i < 10; i++ {
+		go HammerLockMultiple(m, i, 1000, c)
+	}
 
-		for i := 1; i < 10; i += 2 {
-			mu.Lock("counter")
-			counter = append(counter, i)
-			mu.Unlock("counter")
-			time.Sleep(50 * time.Millisecond)
-		}
-	}()
-
-	wg.Wait()
-
-	assert.Equal(t, []int{1, 2, 3, 4, 5, 6, 7, 8, 9}, counter)
+	for i := 0; i < 10; i++ {
+		<-c
+	}
 }
