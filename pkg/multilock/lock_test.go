@@ -23,7 +23,7 @@ func TestLock(t *testing.T) {
 			mu.Lock("counter")
 			counter = append(counter, i)
 			mu.Unlock("counter")
-			time.Sleep(50 * time.Microsecond)
+			time.Sleep(50 * time.Millisecond)
 		}
 	}()
 
@@ -34,7 +34,7 @@ func TestLock(t *testing.T) {
 			mu.Lock("counter")
 			counter = append(counter, i)
 			mu.Unlock("counter")
-			time.Sleep(50 * time.Microsecond)
+			time.Sleep(50 * time.Millisecond)
 		}
 	}()
 
