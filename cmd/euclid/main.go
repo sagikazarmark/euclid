@@ -15,6 +15,7 @@ import (
 	"github.com/goph/emperror"
 	"github.com/oklog/run"
 	"github.com/pkg/errors"
+	"github.com/sagikazarmark/euclid/internal/euclid/euclidhttp"
 	"github.com/sagikazarmark/euclid/internal/platform/buildinfo"
 	"github.com/sagikazarmark/euclid/internal/platform/database"
 	"github.com/sagikazarmark/euclid/internal/platform/errorhandler"
@@ -22,6 +23,7 @@ import (
 	"github.com/sagikazarmark/euclid/internal/platform/jaeger"
 	"github.com/sagikazarmark/euclid/internal/platform/log"
 	"github.com/sagikazarmark/euclid/internal/platform/prometheus"
+	"github.com/sagikazarmark/euclid/pkg/euclid"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"go.opencensus.io/plugin/ochttp"
@@ -209,7 +211,7 @@ func main() {
 
 	// Set up app server
 	{
-		const name = "app"
+		const name = "http"
 		logger := log.WithFields(logger, map[string]interface{}{"server": name})
 
 		logger.Info("listening on address", map[string]interface{}{"address": config.App.Addr})
@@ -217,9 +219,12 @@ func main() {
 		ln, err := upg.Fds.Listen("tcp", config.App.Addr)
 		emperror.Panic(err)
 
+		errorHandler := emperror.HandlerWith(errorHandler, "module", "euclid", "server", name)
+		app := euclidhttp.NewApp(&euclid.InMemorySequence{}, errorHandler)
+
 		server := &http.Server{
 			Handler: &ochttp.Handler{
-				Handler: http.DefaultServeMux,
+				Handler: app,
 			},
 			ErrorLog: log.NewErrorStandardLogger(logger),
 		}
