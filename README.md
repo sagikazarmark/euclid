@@ -1,4 +1,4 @@
-# Euclid
+![Euclid](/.github/logo.png?raw=true)
 
 [![CircleCI (all branches)](https://img.shields.io/circleci/project/github/sagikazarmark/euclid.svg?style=flat-square)](https://circleci.com/gh/sagikazarmark/euclid)
 [![Go Report Card](https://goreportcard.com/badge/github.com/sagikazarmark/euclid?style=flat-square)](https://goreportcard.com/report/github.com/sagikazarmark/euclid)
