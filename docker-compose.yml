@@ -1,0 +1,13 @@
+version: "3.1"
+
+services:
+    db:
+        image: mysql:8.0
+        environment:
+            MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+            MYSQL_DATABASE: app
+
+    jaeger:
+        image: jaegertracing/all-in-one:latest
+        environment:
+            COLLECTOR_ZIPKIN_HTTP_PORT: 9411
