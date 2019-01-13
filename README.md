@@ -7,6 +7,9 @@
 
 **A simple sequential ID generator**
 
+Euclid generates unique, incrementing sequential IDs (like an `AUTO_INCREMENT` primary key in MySQL).
+
+
 ## License
 
 The MIT License (MIT). Please see [License File](LICENSE) for more information.
